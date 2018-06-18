@@ -26,7 +26,7 @@ APPLICATION_NAME = 'EDGE_dispatcher'
 
 TOPIC_MAP = {
         'WeatherObserved': '37371A66CAD33',
-        'EnergyMonitor':   'EnergyMonitor',
+        'EnergyMonitor':   '13298B927F927',
         'Device':          'Device',
         }
 
