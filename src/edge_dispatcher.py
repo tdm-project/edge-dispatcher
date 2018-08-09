@@ -160,7 +160,7 @@ def main():
 
     pre_parser.add_argument('-c', '--config-file', dest='config_file', action='store',
         type=str, metavar='FILE',
-        help='specify the config file')
+        help='specifies the path of the configuration file')
 
     args, remaining_args = pre_parser.parse_known_args()
 
@@ -244,10 +244,11 @@ def main():
         help='port of the remote broker (default: {})'.format(MQTT_REMOTE_PORT))
     parser.add_argument('--remote-tls', dest='mqtt_remote_tls', action='store',
         type=bool,
-        help='the remote broker uses TLS (default: {})'.format(MQTT_REMOTE_TLS))
+        help='remote broker uses TLS (default: {})'.format(MQTT_REMOTE_TLS))
     parser.add_argument('--remote-cafile', dest='mqtt_remote_cafile', action='store',
         type=str,
-        help='path of the ca file for the remote broker')
+        help='path of the trusted CA certificates file for the remote broker (default: {})'
+            .format(MQTT_REMOTE_CA_FILE))
     parser.add_argument('--remote-certfile', dest='mqtt_remote_certfile', action='store',
         type=str,
         help='path of the cert file for the remote broker')
@@ -256,17 +257,16 @@ def main():
         help='path of the key file for the remote broker')
     parser.add_argument('--remote-user', dest='mqtt_remote_user', action='store',
         type=str,
-        help='username for the remote broker')
+        help='username to use for the remote broker (default: the edge id)')
     parser.add_argument('--remote-pass', dest='mqtt_remote_pass', action='store',
         type=str,
-        help='password for the remote broker')
+        help='password to use for the remote broker')
     parser.add_argument('--remote-secret', dest='mqtt_remote_secret', action='store',
         type=str,
-        help='password for the remote broker in Docker Secret')
-
+        help='password to use for the remote broker in Docker Secret')
 
     parser.add_argument('--edge-id', dest='edge_id', action='store',
-        type=str, help='id of the edge gateway (mandatory)')
+        type=str, help='id of the edge gateway (default: the board serial number)')
 
     args = parser.parse_args()
 
