@@ -23,7 +23,6 @@ Values are applied in the following order, the last overwriting the previous:
 2. configuration file section '***EDGE\_dispatcher***' for both common and specific options;
 3. command line options.
 
--
 ### Configuration file
 #### Local broker options
 * **mqtt\_host**
@@ -102,7 +101,6 @@ mqtt_remote_port = 8883
 logging_level = 0
 ```
 
--
 ### Command line
 -  **-h, --help**
 
