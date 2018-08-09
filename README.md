@@ -13,7 +13,7 @@ It carries out the task of:
 - manage locally any interruptions or deteriorations of the communications.
 
 ## Dispatcher Data Flow
-![Dispatcher Data Flow](./docs/img/Dispatcher Data Flow.png)
+![Dispatcher Data Flow](./docs/img/dispatcher_data_flow.png)
 
 ## Configurations
 Settings are retrieved from both configuration file and command line.
