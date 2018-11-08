@@ -107,7 +107,7 @@ class MQTTConnection():
             self._logger.fatal(
                 "Connection to Local MQTT broker '{:s}:{:d}' failed. "
                 "Error was: {:s}.".format(self._host, self._port, str(ex)))
-            self._logger.info("Exiting.")
+            self._logger.fatal("Exiting.")
             sys.exit(-1)
 
         if self._userdata['MQTT_REMOTE_TLS'] is True:
@@ -134,7 +134,7 @@ class MQTTConnection():
                     self._userdata['MQTT_REMOTE_HOST'],
                     self._userdata['MQTT_REMOTE_PORT']
                 ))
-            self._remote_client.connect_async(
+            self._remote_client.connect(
                 self._userdata['MQTT_REMOTE_HOST'],
                 self._userdata['MQTT_REMOTE_PORT'],
                 self._keepalive)
