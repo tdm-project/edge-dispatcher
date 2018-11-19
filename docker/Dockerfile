@@ -16,7 +16,9 @@ RUN \
 	pip3 install paho-mqtt 
 
 WORKDIR ${APP_HOME}
+
 COPY src src
+COPY tests tests
 
 ENTRYPOINT ["src/entrypoint.sh"]
 
