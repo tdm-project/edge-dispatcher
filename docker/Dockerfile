@@ -5,7 +5,7 @@ LABEL maintainer="Massimo Gaggero <massimo dot gaggero at crs4 dot it>"
 ENV APP_HOME=/opt/edge/
 
 # Install required packages
-RUN apk add --no-cache python3 && \
+RUN apk add --no-cache python3 ca-certificates && \
 	pip3 install virtualenv
 
 RUN \
