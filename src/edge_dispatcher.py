@@ -238,17 +238,7 @@ class MQTTConnection():
                 ))
 
 
-def main():
-    logging.basicConfig(
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        level=logging.INFO)
-    logger = logging.getLogger(APPLICATION_NAME)
-
-    # Checks the Python Interpeter version
-    if sys.version_info < (3, 0):
-        logger.fatal("This software requires Python version >= 3.0: exiting.")
-        sys.exit(-1)
-
+def configuration_parser(p_args=None):
     pre_parser = argparse.ArgumentParser(add_help=False)
 
     pre_parser.add_argument(
@@ -256,18 +246,19 @@ def main():
         type=str, metavar='FILE',
         help='specifies the path of the configuration file')
 
-    args, remaining_args = pre_parser.parse_known_args()
+    args, remaining_args = pre_parser.parse_known_args(p_args)
 
     v_general_config_defaults = {
-        'mqtt_host'     : MQTT_LOCAL_HOST,
-        'mqtt_port'     : MQTT_LOCAL_PORT,
-        'logging_level' : logging.INFO,
+        # # DEPRECATED option names
+        # 'mqtt_host'       : MQTT_LOCAL_HOST,
+        # 'mqtt_port'       : MQTT_LOCAL_PORT,
+
+        'mqtt_local_host' : MQTT_LOCAL_HOST,
+        'mqtt_local_port' : MQTT_LOCAL_PORT,
+        'logging_level'   : logging.INFO,
     }
 
     v_specific_config_defaults = {
-        'mqtt_local_host' : MQTT_LOCAL_HOST,
-        'mqtt_local_port' : MQTT_LOCAL_PORT,
-
         'mqtt_remote_host' : MQTT_REMOTE_HOST,
         'mqtt_remote_port' : MQTT_REMOTE_PORT,
 
@@ -290,12 +281,6 @@ def main():
     v_config_defaults = {}
     v_config_defaults.update(v_general_config_defaults)
     v_config_defaults.update(v_specific_config_defaults)
-
-    v_serial = edge_serial()
-    if v_serial:
-        _edge_serial = "Edge-{}".format(v_serial)
-        v_config_defaults.update({'edge_id': _edge_serial})
-        v_config_defaults.update({'mqtt_remote_user': _edge_serial.lower()})
 
     if args.config_file:
         _config = configparser.ConfigParser()
@@ -380,17 +365,40 @@ def main():
         type=str,
         help='id of the edge gateway (default: the board serial number)')
 
-    args = parser.parse_args()
+    args = parser.parse_args(remaining_args)
+    return args
+
+
+def main():
+    logging.basicConfig(
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        level=logging.INFO)
+    logger = logging.getLogger(APPLICATION_NAME)
+
+    # Checks the Python Interpeter version
+    if sys.version_info < (3, 0):
+        logger.fatal("This software requires Python version >= 3.0: exiting.")
+        sys.exit(-1)
+
+    v_serial = edge_serial()
+
+    args = configuration_parser()
 
     logger.setLevel(args.logging_level)
     logger.info("Starting {:s}".format(APPLICATION_NAME))
     logger.debug(vars(args))
 
     if not args.edge_id:
-        logger.fatal(
-            "No EDGE ID specified. Specify in command line with '--edge-id' "
-            "or in config file option 'edge_id'")
-        sys.exit(-1)
+        if not v_serial:
+            logger.fatal(
+                "No EDGE ID specified. Specify in command line with "
+                "'--edge-id' or in config file option 'edge_id'")
+            sys.exit(-1)
+        else:
+            args.edge_id = "Edge-{}".format(v_serial)
+
+    if not args.mqtt_remote_user:
+        args.mqtt_remote_user = args.edge_id.lower()
 
     _userdata = {
         'EDGE_ID': args.edge_id,
