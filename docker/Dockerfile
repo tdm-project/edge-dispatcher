@@ -6,8 +6,9 @@ ENV APP_HOME=/opt/edge/
 
 # Install required packages
 RUN apk add --no-cache python3 ca-certificates && \
-	[[ ! -e /etc/ssl/cert.pem ]] && ln -sf /etc/ssl/certs/ca-certificates.crt /etc/ssl/cert.pem \
+	ln -sf /etc/ssl/certs/ca-certificates.crt /etc/ssl/cert.pem && \
 	pip3 install virtualenv
+
 
 RUN \
 	mkdir -p ${APP_HOME} && \
