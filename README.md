@@ -25,23 +25,18 @@ Values are applied in the following order, the last overwriting the previous:
 
 ### Configuration file
 #### Local broker options
-* **mqtt\_host**
-
-   hostname or address of the local broker (default: *localhost*)
-
-* **mqtt\_port**
-
-   port of the local broker (default: *1883*)
-
-#### Remote broker options
 * **mqtt\_local\_host**
 
-	hostname or address of the local broker (default: *localhost*)
+	hostname or address of the local broker (default: *localhost*) 
 
 * **mqtt\_local\_port**
 
 	port of the local broker (default: *1883*)
 
+
+###  The options *mqtt\_host* and *mqtt\_port* now are deprecated and no longer recognized. *mqtt\_local\_host* and *mqtt\_local\_port* must be used instead.
+
+#### Remote broker options
 * **mqtt\_remote\_host**
 
 	hostname or address of the remote broker (default: )
@@ -84,8 +79,13 @@ Values are applied in the following order, the last overwriting the previous:
 
    threshold level for log messages (default: *20*)
 
+When a settings is present both in the *GENERAL* and *application specific*  section, the application specific is applied to the 
+specific handler.
 
-When a settings is present both in the *GENERAL* and *application specific*  section, the application specific is applied to the specific handler.
+#### Options accepted in GENERAL section
+* **mqtt\_local\_host**
+* **mqtt\_local\_port**
+* **logging\_level**
 
 In this example, the *logging\_level* settings is overwritten to *1* only for this handler, while other handlers use *0* from the section *GENERAL*:
 
@@ -96,9 +96,9 @@ logging_level = 0
 [EDGE_dispatcher]
 mqtt_local_host = mosquitto
 mqtt_local_port = 1883
-mqtt_remote_host = tdm-broker.example.com
+mqtt_remote_host = broker.example.com
 mqtt_remote_port = 8883
-logging_level = 0
+logging_level = 1
 ```
 
 ### Command line
