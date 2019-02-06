@@ -94,7 +94,9 @@ class MQTTConnection():
         self._local_client.on_message = self._on_message
         self._local_client.on_disconnect = self._on_disconnect
 
-        self._remote_client = mqtt.Client(userdata=self._userdata)
+        self._remote_client = mqtt.Client(
+            client_id=self._userdata['EDGE_ID'],
+            userdata=self._userdata)
         self._remote_client.on_connect = self._on_remote_connect
         self._remote_client.on_disconnect = self._on_remote_disconnect
 
