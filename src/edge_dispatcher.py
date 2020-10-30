@@ -100,6 +100,11 @@ class MQTTConnection():
         self._remote_client.on_connect = self._on_remote_connect
         self._remote_client.on_disconnect = self._on_remote_disconnect
 
+        if self._userdata['MQTT_REMOTE_HOST']:
+            self._remote_client.publish_enabled = True
+        else:
+            self._remote_client.publish_enabled = False
+
     def connect(self):
         self._logger.debug("Connecting to Local MQTT broker '{:s}:{:d}'".
                            format(self._host, self._port))
@@ -112,43 +117,50 @@ class MQTTConnection():
             self._logger.fatal("Exiting.")
             sys.exit(-1)
 
-        if self._userdata['MQTT_REMOTE_TLS'] is True:
-            self._remote_client.tls_set(
-                ca_certs=self._userdata['MQTT_REMOTE_CAFILE'],
-                # Unused, reserved
-                # certfile=self._userdata['MQTT_REMOTE_CERT_FILE'],
-                # keyfile=self._userdata['MQTT_REMOTE_KEY_FILE']
-                # cert_reqs=ssl.CERT_REQUIRED,
-                # tls_version=ssl.PROTOCOL_TLS,
-                # ciphers=None
-            )
+        if self._remote_client.publish_enabled:
+            self._logger.info(
+                "MQTT remote host is set: remote data transmission is enabled")
 
-        if self._userdata['MQTT_REMOTE_USER'] not in [""]:
-            self._remote_client.username_pw_set(
-                self._userdata['MQTT_REMOTE_USER'],
-                self._userdata['MQTT_REMOTE_PASS']
-            )
+            if self._userdata['MQTT_REMOTE_TLS'] is True:
+                self._remote_client.tls_set(
+                    ca_certs=self._userdata['MQTT_REMOTE_CAFILE'],
+                    # Unused, reserved
+                    # certfile=self._userdata['MQTT_REMOTE_CERT_FILE'],
+                    # keyfile=self._userdata['MQTT_REMOTE_KEY_FILE']
+                    # cert_reqs=ssl.CERT_REQUIRED,
+                    # tls_version=ssl.PROTOCOL_TLS,
+                    # ciphers=None
+                )
 
-        try:
-            self._logger.debug(
-                "Connecting to Remote MQTT broker '{:s}:{:d}'".
-                format(
-                    self._userdata['MQTT_REMOTE_HOST'],
-                    self._userdata['MQTT_REMOTE_PORT']
-                ))
-            self._remote_client.connect(
-                self._userdata['MQTT_REMOTE_HOST'],
-                self._userdata['MQTT_REMOTE_PORT'],
-                self._keepalive)
-        except Exception as ex:
-            self._logger.fatal(
-                "Connection to Remote MQTT broker '{:s}:{:d}' failed. "
-                "Error was: {:s}.".
-                format(
+            if self._userdata['MQTT_REMOTE_USER'] not in [""]:
+                self._remote_client.username_pw_set(
+                    self._userdata['MQTT_REMOTE_USER'],
+                    self._userdata['MQTT_REMOTE_PASS']
+                )
+
+            try:
+                self._logger.debug(
+                    "Connecting to Remote MQTT broker '{:s}:{:d}'".
+                    format(
+                        self._userdata['MQTT_REMOTE_HOST'],
+                        self._userdata['MQTT_REMOTE_PORT']
+                    ))
+                self._remote_client.connect(
                     self._userdata['MQTT_REMOTE_HOST'],
                     self._userdata['MQTT_REMOTE_PORT'],
-                    str(ex)))
-            self._logger.info("Retrying.")
+                    self._keepalive)
+            except Exception as ex:
+                self._logger.fatal(
+                    "Connection to Remote MQTT broker '{:s}:{:d}' failed. "
+                    "Error was: {:s}.".
+                    format(
+                        self._userdata['MQTT_REMOTE_HOST'],
+                        self._userdata['MQTT_REMOTE_PORT'],
+                        str(ex)))
+                self._logger.info("Retrying.")
+        else:
+            self._logger.info(
+                "MQTT remote host is empty: remote data transmission is disabled")
 
         self._remote_client.loop_start()
         self._local_client.loop_forever()
@@ -192,18 +204,19 @@ class MQTTConnection():
             "Sending message -  topic:\'{:s}\', message:\'{:s}\'".
             format(_topic, _message))
 
-        _msg_info = self._remote_client.publish(_topic, _message)
+        if self._remote_client.publish_enabled:
+            _msg_info = self._remote_client.publish(_topic, _message)
 
-        if _msg_info.rc == mqtt.MQTT_ERR_SUCCESS:
-            self._logger.debug(
-                "Message sent to Remote MQTT broker - "
-                "topic:'{:s}', message:'{:s}'".format(_topic, _message))
-        else:
-            self._logger.error(
-                "Message not sent to Remote MQTT broker - "
-                "error:'{:s}', id:'{:d}', topic:'{:s}', message:'{:s}'".
-                format(mqtt.error_string(_msg_info.rc), _msg_info.mid, _topic,
-                       _message))
+            if _msg_info.rc == mqtt.MQTT_ERR_SUCCESS:
+                self._logger.debug(
+                    "Message sent to Remote MQTT broker - "
+                    "topic:'{:s}', message:'{:s}'".format(_topic, _message))
+            else:
+                self._logger.error(
+                    "Message not sent to Remote MQTT broker - "
+                    "error:'{:s}', id:'{:d}', topic:'{:s}', message:'{:s}'".
+                    format(mqtt.error_string(_msg_info.rc), _msg_info.mid, _topic,
+                           _message))
 
     def _on_remote_connect(self, client, userdata, flags, rc):
         # pylint: disable=unused-argument,invalid-name
